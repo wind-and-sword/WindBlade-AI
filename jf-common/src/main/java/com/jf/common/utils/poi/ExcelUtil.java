@@ -1904,6 +1904,78 @@ public class ExcelUtil<T>
     }
 
     /**
+     * 统计指定列中各值的出现次数
+     * 
+     * @param is 输入流
+     * @param columnName 列名
+     * @return 统计结果 Map<值, 次数>
+     */
+    public static Map<String, Integer> countColumnValueFrequency(InputStream is, String columnName)
+    {
+        Map<String, Integer> result = new HashMap<>();
+        Workbook wb = null;
+        try
+        {
+            wb = WorkbookFactory.create(is);
+            Sheet sheet = wb.getSheetAt(0);
+            if (sheet == null)
+            {
+                throw new IOException("文件sheet不存在");
+            }
+
+            // 获取表头
+            Row header = sheet.getRow(0);
+            if (header == null)
+            {
+                throw new UtilException("文件标题行为空，请检查Excel文件格式");
+            }
+
+            int columnIndex = -1;
+            for (int i = 0; i < header.getLastCellNum(); i++)
+            {
+                Cell cell = header.getCell(i);
+                if (cell != null && columnName.equals(cell.toString()))
+                {
+                    columnIndex = i;
+                    break;
+                }
+            }
+
+            if (columnIndex == -1)
+            {
+                return result;
+            }
+
+            int rows = sheet.getLastRowNum();
+            ExcelUtil<Object> util = new ExcelUtil<>(Object.class);
+            for (int i = 1; i <= rows; i++)
+            {
+                Row row = sheet.getRow(i);
+                if (util.isRowEmpty(row))
+                {
+                    continue;
+                }
+                Object val = util.getCellValue(row, columnIndex);
+                String value = Convert.toStr(val);
+                if (StringUtils.isNotEmpty(value))
+                {
+                    result.put(value, result.getOrDefault(value, 0) + 1);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new UtilException(e.getMessage());
+        }
+        finally
+        {
+            IOUtils.closeQuietly(wb);
+            IOUtils.closeQuietly(is);
+        }
+        return result;
+    }
+
+    /**
      * 获取对象的子列表方法
      * 
      * @param name 名称

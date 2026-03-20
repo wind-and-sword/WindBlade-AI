@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能分析</title>
+</head>
+<body>
+    <header>智能分析</header>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="upload-area" id="uploadArea">
+                <p>点击上传待分析文件</p>
+                <input type="file" id="fileInput" hidden>
+            </div>
+            <div id="fileList" class="file-list"></div>
+        </aside>
+
+        <main class="chat-container">
+            <div id="chat-history">
+                <div class="msg ai">请先上传文件，然后在这里输入你的问题。</div>
+            </div>
+            <div class="input-area">
+                <textarea
+                    id="questionInput"
+                    placeholder="针对文件内容提问..."
+                    disabled
+                    autocomplete="off"
+                    rows="1"
+                ></textarea>
+                <button id="sendBtn" disabled>发送</button>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
