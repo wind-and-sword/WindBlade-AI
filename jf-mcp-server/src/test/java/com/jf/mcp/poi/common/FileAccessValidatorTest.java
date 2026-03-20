@@ -106,6 +106,23 @@ class FileAccessValidatorTest
                 () -> validator.validateReadableFile(linkedDir.resolve(outsideFile.getFileName()).toString()));
     }
 
+    @Test
+    void rejectsAccessThroughWindowsJunction() throws IOException, InterruptedException
+    {
+        Assumptions.assumeTrue(isWindows(), "Windows junctions are only available on Windows");
+
+        Path allowedRoot = tempDir.resolve("allowed");
+        Files.createDirectories(allowedRoot);
+        Path outsideDir = Files.createDirectories(tempDir.resolve("outside"));
+        Path outsideFile = Files.writeString(outsideDir.resolve("secret.txt"), "blocked");
+        Path linkedDir = allowedRoot.resolve("junction");
+        createWindowsJunctionOrSkip(linkedDir, outsideDir);
+        FileAccessValidator validator = validatorFor(allowedRoot);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> validator.validateReadableFile(linkedDir.resolve(outsideFile.getFileName()).toString()));
+    }
+
     private FileAccessValidator validatorFor(Path allowedRoot) throws IOException
     {
         Files.createDirectories(allowedRoot);
@@ -125,5 +142,23 @@ class FileAccessValidatorTest
         {
             Assumptions.assumeTrue(false, "Symbolic links are unavailable in this environment: " + ex.getMessage());
         }
+    }
+
+    private void createWindowsJunctionOrSkip(Path link, Path target) throws IOException, InterruptedException
+    {
+        Process process = new ProcessBuilder("cmd", "/c", "mklink", "/J", link.toString(), target.toString())
+                .redirectErrorStream(true)
+                .start();
+        int exitCode = process.waitFor();
+        if (exitCode != 0)
+        {
+            String output = new String(process.getInputStream().readAllBytes());
+            Assumptions.assumeTrue(false, "Windows junctions are unavailable in this environment: " + output);
+        }
+    }
+
+    private boolean isWindows()
+    {
+        return System.getProperty("os.name").toLowerCase().contains("win");
     }
 }
