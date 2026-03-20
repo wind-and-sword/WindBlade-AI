@@ -29,15 +29,20 @@ public class FileAccessValidator
         {
             throw new IllegalArgumentException("禁止访问授权目录之外的文件");
         }
-        if (!Files.isRegularFile(candidate))
+        if (!Files.isRegularFile(candidate, LinkOption.NOFOLLOW_LINKS))
         {
             throw new IllegalArgumentException("文件不存在或不是普通文件");
         }
 
-        Path realPath = candidate.toRealPath(LinkOption.NOFOLLOW_LINKS);
-        if (!realPath.startsWith(allowedRoot))
+        Path realAllowedRoot = allowedRoot.toRealPath();
+        Path realPath = candidate.toRealPath();
+        if (!realPath.startsWith(realAllowedRoot))
         {
             throw new IllegalArgumentException("禁止通过链接访问授权目录之外的文件");
+        }
+        if (!Files.isReadable(realPath))
+        {
+            throw new IllegalArgumentException("文件不可读");
         }
         return realPath;
     }
