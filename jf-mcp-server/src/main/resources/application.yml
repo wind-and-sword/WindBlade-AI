@@ -19,4 +19,8 @@ spring:
           prompt: true
           completion: true
 
+mcp:
+  file-access:
+    allowed-root: ${MCP_ALLOWED_ROOT:D:/jf/uploadPath/chat/mcp}
+    fallback-charset: ${MCP_TEXT_FALLBACK_CHARSET:GB18030}
 

@@ -75,7 +75,7 @@ spring:
       # 数据库索引
       database: 2
       # 密码
-      password: Jyzk@qsz
+      password: ${REDIS_PASSWORD:}
       # 连接超时时间
       timeout: 10s
       lettuce:
@@ -98,7 +98,7 @@ spring:
     mcp:
       client:
         type: ASYNC
-        request-timeout: 60s
+        request-timeout: 300s
         toolcallback:
           enabled: true
         sse:
